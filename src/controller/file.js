@@ -70,5 +70,7 @@ const deleteFile = asyncHandler(async (req, res) => {
     fs.unlinkSync(path.join(__dirname, "./../../" + file.path))
     const result = await FileModel.deleteOne({ _id: id })
     return res.json(result)
+    // return res.json(result)
 })
+
 module.exports = { handleUpload, getFile, handleUploads, handleS3Upload, deleteFileS3, getAllFiles, deleteFile }
