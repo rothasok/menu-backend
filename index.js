@@ -1,6 +1,9 @@
 require('dotenv').config()
 
 const express = require('express')
+const { createServer } = require('node:http');
+const { join } = require('node:path');
+const { Server } = require("socket.io");
 const bodyParser = require('body-parser')
 const passport = require('passport');
 const rateLimit = require('express-rate-limit')
@@ -19,11 +22,27 @@ const redisClient = require('./src/redis/index.js');
 const fileRouter = require('./src/routes/file.js');
 
 const app = express()
+const server = createServer(app);
+const io = new Server(server, {
+    cors: {
+        origin: '*'
+    }
+})
+
+// protocol: http, express
+app.get('/', (req, res) => {
+    res.sendFile(join(__dirname, 'index.html'))
+})
+
+// protocal: websocket, socket.io
+io.on('connection', (socket) => {
+    console.log(`${socket.id} connected`);
+})
 
 dbConnect().catch((err) => {
     console.log(err)
 })
-redisClient.connect()
+// redisClient.connect()
 
 const limiter = rateLimit({
     store: new RedisStore({
@@ -66,6 +85,6 @@ app.use('/users', passport.authenticate('jwt', { session: false }), userRouter)
 
 app.use(handleError)
 
-app.listen(process.env.PORT, function () {
+server.listen(process.env.PORT, function () {
     console.log(`Server is running on port ${process.env.PORT}`)
 })

@@ -24,6 +24,7 @@ services:
       - ./index.js:/app/index.js
       - .env:/app/.env
       - ./uploads:/app/uploads
+      - ./index.html:/app/index.html
     scale: 3
     depends_on:
       - mongodb

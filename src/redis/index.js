@@ -6,6 +6,6 @@ redisClient.on('connect', () => {
 })
 redisClient.on('error', (err) => {
     console.log('Error connection to redis', err)
-})
+}).connect()
 
 module.exports = redisClient

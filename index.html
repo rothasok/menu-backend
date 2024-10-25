@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vue 3 Chat Room</title>
+  <script src="https://unpkg.com/vue@3"></script>
+  <script src="https://unpkg.com/vue-router@4.0.15/dist/vue-router.global.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"
+    integrity="sha384-2huaZvOR9iDzHqslqwpR87isEmrfxqyWOF7hr7BY6KG0+hVKLoEXMPUJw3ynWuhO"
+    crossorigin="anonymous"></script>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+
+<body>
+  <div id="app" class="min-h-screen flex items-center justify-center">
+    <router-view></router-view>
+  </div>
+  <script>
+    const Home = {
+      template: `
+    <div class="max-w-md w-full bg-white p-8 rounded-lg shadow-md">
+      <h2 class="text-2xl font-bold mb-6">Login</h2>
+      <form @submit.prevent="login" class="space-y-4">
+        <div>
+          <label for="email" class="block text-sm font-medium text-gray-700">Username:</label>
+          <input v-model="email" id="username" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" required>
+        </div>
+        <div>
+          <label for="password" class="block text-sm font-medium text-gray-700">Password:</label>
+          <input type="password" v-model="password" id="password" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" required>
+        </div>
+        <button type="submit" class="w-full py-2 px-4 bg-indigo-600 text-white font-medium rounded-md shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">Login</button>
+      </form>
+    </div>
+    `,
+      data() {
+        return {
+          username: '',
+          password: ''
+        };
+      },
+      methods: {
+        async login() {
+          try {
+            const response = await axios.post('/auth/login', {
+              email: this.email,
+              password: this.password
+            });
+            localStorage.setItem('token', response.data.token);
+            localStorage.setItem('user', this.username);
+            this.$router.push('/chat');
+          } catch (error) {
+            alert('Login failed');
+          }
+        }
+      }
+    };
+
+    const Chat = {
+      template: `
+    <div class="max-w-2xl w-full bg-white p-8 rounded-lg shadow-md">
+      <h2 class="text-2xl font-bold mb-6">Chat Room</h2>
+      <div v-if="!connected" class="text-center text-gray-500">Connecting...</div>
+      <div v-else>
+        <div class="space-y-4 mb-6">
+          <div v-for="message in messages" :key="message.id" class="border-b border-gray-200 pb-2">
+            <strong class="text-indigo-600">{{ message.username }}</strong>: {{ message.text }}
+          </div>
+        </div>
+        <form @submit.prevent="sendMessage" class="flex space-x-4">
+          <input v-model="newMessage" class="flex-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" placeholder="Type a message" required>
+          <button type="submit" class="py-2 px-4 bg-indigo-600 text-white font-medium rounded-md shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">Send</button>
+        </form>
+      </div>
+    </div>
+    `,
+      data() {
+        return {
+          messages: [],
+          newMessage: '',
+          connected: false,
+          socket: null
+        };
+      },
+      created() {
+        this.connectWebSocket();
+      },
+      methods: {
+        connectWebSocket() {
+          console.log("Trying to connect!")
+          // const token = localStorage.getItem('token');
+          // if (!token) {
+          //   this.$router.push('/');
+          //   return;
+          // }
+
+          this.socket = io('http://localhost:3000', {
+            // auth: {
+            //   token: `Bearer ${token}`
+            // },
+            transports: ['websocket']
+          })
+
+          // this.socket.join('chat')
+
+          this.socket.on('connect', () => {
+            this.connected = true;
+            console.log("Websocket Initialized!")
+          });
+
+          this.socket.on('re-message', (message) => {
+            this.messages.push(message);
+          });
+
+          this.socket.on('disconnect', () => {
+            this.connected = false;
+          });
+        },
+        // Extract user info from Token
+        sendMessage() {
+          const message = {
+            text: this.newMessage,
+            username: "KKK"
+          };
+          this.socket.emit('send-message', message);
+          this.newMessage = '';
+        }
+      }
+    };
+
+    const app = Vue.createApp({});
+
+    // app.component(Home);
+    // app.component(Chat);
+
+    const routes = [
+      { path: '/', component: Home },
+      { path: '/chat', component: Chat }
+    ];
+
+    const router = VueRouter.createRouter({
+      history: VueRouter.createWebHistory(),
+      routes
+    });
+
+    app.use(router);
+    app.mount('#app');
+
+  </script>
+</body>
+
+</html>
