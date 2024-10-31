@@ -34,7 +34,7 @@ const login = asyncHandler(async (req, res) => {
     if (user.type == "SSO") {
         return res.status(405).json("Only Password User Allowed")
     }
-    
+
     const compareResult = await bcrypt.compare(password, user.password)
     if (!compareResult) {
         return res.status(401).json("Incorrect email or password")
@@ -89,4 +89,9 @@ const showGoogleOAuth = (req, res) => {
     return res.redirect(googleAuthUrl)
 }
 
-module.exports = { signUp, login, handleGoogle, showGoogleOAuth }
+const exchangeJWTToUser = asyncHandler(async (req, res) => {
+    console.log(req.user)
+    return res.json(req.user)
+})
+
+module.exports = { signUp, login, handleGoogle, showGoogleOAuth, exchangeJWTToUser }

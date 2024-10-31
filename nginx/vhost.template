@@ -9,8 +9,8 @@ http {
     }
     upstream backend {
         server ${EXPRESS_HOST_1}:${EXPRESS_PORT};
-        server ${EXPRESS_HOST_2}:${EXPRESS_PORT};
-        server ${EXPRESS_HOST_3}:${EXPRESS_PORT};
+        # server ${EXPRESS_HOST_2}:${EXPRESS_PORT};
+        # server ${EXPRESS_HOST_3}:${EXPRESS_PORT};
     }
     server {
         listen 3000;

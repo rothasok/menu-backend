@@ -18,24 +18,26 @@
   <div id="app" class="min-h-screen flex items-center justify-center">
     <router-view></router-view>
   </div>
-  <script>
+  <script type="module">
+    import { faker } from 'https://esm.sh/@faker-js/faker';
     const Home = {
       template: `
-    <div class="max-w-md w-full bg-white p-8 rounded-lg shadow-md">
-      <h2 class="text-2xl font-bold mb-6">Login</h2>
-      <form @submit.prevent="login" class="space-y-4">
-        <div>
-          <label for="email" class="block text-sm font-medium text-gray-700">Username:</label>
-          <input v-model="email" id="username" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" required>
-        </div>
-        <div>
-          <label for="password" class="block text-sm font-medium text-gray-700">Password:</label>
-          <input type="password" v-model="password" id="password" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" required>
-        </div>
-        <button type="submit" class="w-full py-2 px-4 bg-indigo-600 text-white font-medium rounded-md shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">Login</button>
-      </form>
-    </div>
-    `,
+  <div class="max-w-md w-full bg-white p-8 rounded-lg shadow-md">
+    <h2 class="text-2xl font-bold mb-6">Login</h2>
+    <form @submit.prevent="login" class="space-y-4">
+      <div>
+        <label for="email" class="block text-sm font-medium text-gray-700">Username:</label>
+        <input v-model="email" id="username" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" required>
+      </div>
+      <div>
+        <label for="password" class="block text-sm font-medium text-gray-700">Password:</label>
+        <input type="password" v-model="password" id="password" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" required>
+      </div>
+      <button type="submit" class="w-full py-2 px-4 bg-indigo-600 text-white font-medium rounded-md shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">Login</button>
+      <button type="button" @click="googleLogin" class="text-white w-full  bg-blue-500 hover:bg-blue-600 focus:ring-4 focus:outline-none focus:ring-blue-700/50 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center justify-between mr-2 mb-2"><svg class="mr-2 -ml-1 w-4 h-4" aria-hidden="true" focusable="false" data-prefix="fab" data-icon="google" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 488 512"><path fill="currentColor" d="M488 261.8C488 403.3 391.1 504 248 504 110.8 504 0 393.2 0 256S110.8 8 248 8c66.8 0 123 24.5 166.3 64.9l-67.5 64.9C258.5 52.6 94.3 116.6 94.3 256c0 86.5 69.1 156.6 153.7 156.6 98.2 0 135-70.4 140.8-106.9H248v-85.3h236.1c2.3 12.7 3.9 24.9 3.9 41.4z"></path></svg>Sign up with Google<div></div></button>
+    </form>
+  </div>
+  `,
       data() {
         return {
           username: '',
@@ -45,38 +47,48 @@
       methods: {
         async login() {
           try {
-            const response = await axios.post('/auth/login', {
+            const response = await axios.post('/v1/auth/login', {
               email: this.email,
               password: this.password
             });
-            localStorage.setItem('token', response.data.token);
-            localStorage.setItem('user', this.username);
+            localStorage.setItem('token', response.data.token)
+            const { data } = await axios.get('/v1/auth/me', {
+              headers: {
+                authorization: `Bearer ${response.data.token}`
+              }
+            });
+            // console.log(data)
+            localStorage.setItem('user', JSON.stringify(data));
+            // const user = await axios.get(`/users/${}`)
             this.$router.push('/chat');
           } catch (error) {
+            console.log(error)
             alert('Login failed');
           }
         }
+        // googleLogin() {
+        //   window.open('/auth/google-oauth', "_self")
+        // }
       }
     };
-
     const Chat = {
       template: `
-    <div class="max-w-2xl w-full bg-white p-8 rounded-lg shadow-md">
-      <h2 class="text-2xl font-bold mb-6">Chat Room</h2>
-      <div v-if="!connected" class="text-center text-gray-500">Connecting...</div>
-      <div v-else>
-        <div class="space-y-4 mb-6">
-          <div v-for="message in messages" :key="message.id" class="border-b border-gray-200 pb-2">
-            <strong class="text-indigo-600">{{ message.username }}</strong>: {{ message.text }}
-          </div>
+  <div class="max-w-2xl w-full bg-white p-8 rounded-lg shadow-md">
+    <h2 class="text-2xl font-bold mb-6">Chat Room</h2>
+    <div v-if="!connected" class="text-center text-gray-500">Connecting...</div>
+    <div v-else>
+      <div class="space-y-4 mb-6">
+        <div v-for="message in messages" :key="message.id" class="border-b border-gray-200 pb-2">
+          <strong class="text-indigo-600">{{ message.username }}</strong>: {{ message.text }}
         </div>
-        <form @submit.prevent="sendMessage" class="flex space-x-4">
-          <input v-model="newMessage" class="flex-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" placeholder="Type a message" required>
-          <button type="submit" class="py-2 px-4 bg-indigo-600 text-white font-medium rounded-md shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">Send</button>
-        </form>
       </div>
+      <form @submit.prevent="sendMessage" class="flex space-x-4">
+        <input v-model="newMessage" class="flex-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" placeholder="Type a message" required>
+        <button type="submit" class="py-2 px-4 bg-indigo-600 text-white font-medium rounded-md shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">Send</button>
+      </form>
     </div>
-    `,
+  </div>
+  `,
       data() {
         return {
           messages: [],
@@ -85,8 +97,17 @@
           socket: null
         };
       },
-      created() {
+      async created() {
         this.connectWebSocket();
+        // Get chat history
+        try {
+          const { data } = await axios.get('/v1/chats')
+          console.log(data)
+          this.messages.push(...data)
+        } catch (err) {
+          console.log(err.message)
+        }
+
       },
       methods: {
         connectWebSocket() {
@@ -96,6 +117,7 @@
           //   this.$router.push('/');
           //   return;
           // }
+          // Get all chat histories from Backend
 
           this.socket = io('http://localhost:3000', {
             // auth: {
@@ -111,8 +133,9 @@
             console.log("Websocket Initialized!")
           });
 
-          this.socket.on('re-message', (message) => {
-            this.messages.push(message);
+          this.socket.on('re-message', (paylaod) => {
+            // console.log(paylaod)
+            this.messages.push(paylaod);
           });
 
           this.socket.on('disconnect', () => {
@@ -121,9 +144,11 @@
         },
         // Extract user info from Token
         sendMessage() {
+          const user = JSON.parse(localStorage.getItem('user'))
           const message = {
             text: this.newMessage,
-            username: "KKK"
+            username: user.username,
+            id: user._id
           };
           this.socket.emit('send-message', message);
           this.newMessage = '';
@@ -133,8 +158,6 @@
 
     const app = Vue.createApp({});
 
-    // app.component(Home);
-    // app.component(Chat);
 
     const routes = [
       { path: '/', component: Home },
@@ -148,7 +171,6 @@
 
     app.use(router);
     app.mount('#app');
-
   </script>
 </body>
 
