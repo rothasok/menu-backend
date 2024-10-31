@@ -47,6 +47,7 @@ const login = asyncHandler(async (req, res) => {
 const handleGoogle = asyncHandler(async (req, res) => {
     // Get one time code from OAuth Server
     const { code } = req.query
+    // console.log(code)
     // Exchange code with Goolge API server
     const { data } = await axios.post('https://oauth2.googleapis.com/token', {
         code,
@@ -83,6 +84,7 @@ const handleGoogle = asyncHandler(async (req, res) => {
     return res.json({ token })
     // If already registered sign JWT token and return
 })
+
 
 const showGoogleOAuth = (req, res) => {
     const googleAuthUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${process.env.GOOGLE_CLIENT_ID}&redirect_uri=${process.env.GOOGLE_REDIRECT_URL}&response_type=code&scope=profile%20email&access_type=offline`;
