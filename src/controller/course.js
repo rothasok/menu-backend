@@ -41,7 +41,14 @@ const getCourses = asyncHandler(async (req, res) => {
     // const course = JSON.parse(result)
     // // console.log(result)
     // return res.json(course)
-    const courses = await CourseModel.find()
+
+    // Price greater than 100, Little than 300
+    const courses = await CourseModel.find({
+        price:{
+            $gte:100.0,
+            $lte:300.0
+        }
+    })
     return res.json(courses)
 })
 
