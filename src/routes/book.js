@@ -6,7 +6,7 @@ const { validation } = require('swagger-generator-express');
 const requestModel = require('../models/request/book')
 
 bookRouter.post('/', validation(requestModel[0]), createBook)
-bookRouter.get('/', getBooks)
+bookRouter.get('/', validation(requestModel[1]), getBooks)
 bookRouter.get('/:id', getBookById)
 bookRouter.delete('/:id', deleteBookbyId)
 bookRouter.put('/:id', updateBookById)
