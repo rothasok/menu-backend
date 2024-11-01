@@ -22,6 +22,7 @@
     "express-intercept": "^1.1.0",
     "express-validator": "^7.2.0",
     "ioredis": "^5.4.1",
+    "joi": "^17.13.3",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.7.1",
     "mongoose-paginate-v2": "^1.8.5",
@@ -33,6 +34,7 @@
     "redis": "^4.7.0",
     "socket.io": "^4.8.0",
     "socket.io-client": "^4.8.1",
+    "swagger-generator-express": "^2.1.1",
     "uuid": "^10.0.0"
   },
   "devDependencies": {

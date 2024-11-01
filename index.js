@@ -11,7 +11,7 @@ const { RedisStore } = require('rate-limit-redis')
 const path = require('path')
 const { Redis } = require('ioredis')
 
-const { handleError, cacheMiddleware, cacheInterceptor, invalidateInterceptor } = require('./src/middlewares/index.js')
+const { handleError, cacheMiddleware, cacheInterceptor, invalidateInterceptor, verifyJWT } = require('./src/middlewares/index.js')
 
 const dbConnect = require('./src/db/db.js')
 const bookRouter = require('./src/routes/book.js')
@@ -25,7 +25,8 @@ const chatRouter = require('./src/routes/chat.js');
 const ChatModel = require('./src/models/chat.js');
 const cors = require('cors')
 
-const { createAdapter } = require("@socket.io/redis-adapter")
+const { createAdapter } = require("@socket.io/redis-adapter");
+const setupSwagger = require('./src/swagger/index.js');
 
 const pubClient = new Redis({
     port: 6379, // Redis port
@@ -34,17 +35,40 @@ const pubClient = new Redis({
 const subClient = pubClient.duplicate();
 const app = express()
 app.use(cors())
+const server = createServer(app, (req, res) => {
+    const headers = {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'OPTIONS, POST, GET',
+        'Access-Control-Max-Age': 2592000, // 30 days
+        /** add other headers as per requirement */
+    }
 
-const server = createServer(app);
+    if (req.method === 'OPTIONS') {
+        res.writeHead(204, headers)
+        res.end()
+        return
+    }
+
+    if (['GET', 'POST'].indexOf(req.method) > -1) {
+        res.writeHead(200, headers)
+        // console.log("Hello World")
+        res.end('Hello World')
+        return
+    }
+
+    res.writeHead(405, headers)
+    res.end(`${req.method} is not allowed for the request.`)
+});
 const io = new Server(server, {
     cors: {
         origin: '*'
-    }
+    },
+    adapter: createAdapter(pubClient, subClient)
 })
 
-app.get('/', (req, res) => {
-    return res.sendFile(path.join(__dirname, 'index.html'))
-})
+// app.get('/', (req, res) => {
+//     return res.sendFile(path.join(__dirname, 'index.html'))
+// })
 // protocol: http, express
 
 
@@ -101,15 +125,32 @@ app.use(limiter)
 app.use('/v1/files', passport.authenticate('jwt', { session: false }), fileRouter)
 
 //Redis Cache
-app.use(cacheMiddleware)
-app.use(cacheInterceptor(30 * 60))
-app.use(invalidateInterceptor)
+// app.use(passport.authenticate('jwt', { session: false }))
+// app.use(cacheMiddleware)
+// app.use(cacheInterceptor(3 * 60))
+// app.use(invalidateInterceptor)
 // Cachable Routes
-app.use('/v1/courses', passport.authenticate('jwt', { session: false }), courseRouter)
-app.use('/v1/books', passport.authenticate('jwt', { session: false }), bookRouter)
-app.use('/v1/users', passport.authenticate('jwt', { session: false }), userRouter)
-
+app.use('/v1/courses',
+    passport.authenticate('jwt', { session: false }),
+    cacheMiddleware,
+    cacheInterceptor(3 * 60),
+    invalidateInterceptor,
+    courseRouter)
+app.use('/v1/books',
+    passport.authenticate('jwt', { session: false }),
+    cacheMiddleware,
+    cacheInterceptor(3 * 60),
+    invalidateInterceptor,
+    bookRouter)
+app.use('/v1/users',
+    passport.authenticate('jwt', { session: false }),
+    cacheMiddleware,
+    cacheInterceptor(3 * 60),
+    invalidateInterceptor,
+    userRouter)
 app.use(handleError)
+
+setupSwagger(app)
 
 server.listen(process.env.PORT, function () {
     console.log(`Server is running on port ${process.env.PORT}`)
