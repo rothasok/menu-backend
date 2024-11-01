@@ -24,10 +24,21 @@ const getBookById = asyncHandler(async (req, res) => {
 })
 
 const getBooks = asyncHandler(async (req, res) => {
+    const { limit, page } = req.query
+    const options = {
+    //    limit: limit ? limit : -1,
+    //     page: page ? page : -1,
+        pagination: limit ? true : false
+    }
+    console.log(options)
     const { join } = req.query
-    // Get all courses 
-    const courses = await BookModel.find().populate(join)
-    return res.json(courses)
+    // Get all books
+   // const books = await BookModel.find().populate(join)
+    //  return res.json(books)
+
+     
+     const books = await BookModel.paginate({}, options)
+     return res.json(books)
 })
 
 const deleteBookbyId = asyncHandler(async (req, res) => {
