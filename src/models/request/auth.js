@@ -31,5 +31,8 @@ module.exports = {
     },
     4: {
         group: "Authentication"
+    },
+    5: {
+        group: "Authentication"
     }
 }

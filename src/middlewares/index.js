@@ -11,6 +11,7 @@ const path = require('path')
 
 const verifyJWT = asyncHandler(async (req, res, next) => {
     const token = req.headers.authorization
+    console.log(token)
     if (!token) {
         return res.status(401).json({ message: 'Authentication failed' });
     }
@@ -20,6 +21,22 @@ const verifyJWT = asyncHandler(async (req, res, next) => {
     req.user = user;
     next();
 })
+
+const verifyRefresh = asyncHandler(async (req, res, next) => {
+    const token = req.headers.authorization
+    console.log(token)
+    if (!token) {
+        return res.status(401).json({ message: 'Authentication failed' });
+    }
+    const extract = token.split(' ')[1]
+    const decoded = jwt.verify(extract, process.env.JWT_REFRESH_SECRET);
+    const user = await UserModel.findById(decoded.id)
+    // console.log(user)
+    req.user = { ...user._doc, extract }
+    // console.log(req.user)
+    next();
+})
+
 function logger(req, res, next) {
     // console.log(req)
     console.log("Incoming request", req.rawHeaders[3])
@@ -143,6 +160,7 @@ module.exports = {
     handleError,
     logger,
     verifyJWT,
+    verifyRefresh,
     handleValidation,
     cacheInterceptor,
     cacheMiddleware,

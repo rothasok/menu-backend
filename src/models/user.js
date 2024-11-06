@@ -8,6 +8,7 @@ const userSchema = new mongoose.Schema({
     email: { type: String, required: true, unique: true },
     createdDate: { type: Date, required: true, default: new Date() },
     password: { type: String },
+    refreshToken: { type: String},
     type: { type: String, default: 'PW' }
 })
 

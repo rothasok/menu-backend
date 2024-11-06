@@ -41,7 +41,15 @@ const login = asyncHandler(async (req, res) => {
     }
     // Sign JWT Token
     const token = signJWT(user._id, user.email, user.username)
-    return res.json({ token })
+
+    // Save refresh in database
+
+    const hashedToken = await bcrypt.hash(token.refreshToken, 10)
+
+    user.refreshToken = hashedToken
+    user.save()
+
+    return res.json(token)
 })
 
 const handleGoogle = asyncHandler(async (req, res) => {
@@ -85,7 +93,6 @@ const handleGoogle = asyncHandler(async (req, res) => {
     // If already registered sign JWT token and return
 })
 
-
 const showGoogleOAuth = (req, res) => {
     const googleAuthUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${process.env.GOOGLE_CLIENT_ID}&redirect_uri=${process.env.GOOGLE_REDIRECT_URL}&response_type=code&scope=profile%20email&access_type=offline`;
     return res.redirect(googleAuthUrl)
@@ -96,4 +103,29 @@ const exchangeJWTToUser = asyncHandler(async (req, res) => {
     return res.json(req.user)
 })
 
-module.exports = { signUp, login, handleGoogle, showGoogleOAuth, exchangeJWTToUser }
+const exchangeRefreshToken = asyncHandler(async (req, res) => {
+    // Validate Refresh Token
+    console.log(req.user)
+    const encodedToken = req.user.extract
+    const compareResult = await bcrypt.compare(encodedToken, req.user.refreshToken)
+    if (!compareResult) {
+        return res.status(401).json("Incorrect token")
+    }
+
+    // Sign JWT Token
+    const token = signJWT(req.user._id, req.user.email, req.user.username)
+
+    // Save refresh in database
+
+    const hashedToken = await bcrypt.hash(token.refreshToken, 10)
+
+    const user = await UserModel.findById(req.user._id)
+    user.refreshToken = hashedToken
+    user.save()
+    // req.user.refreshToken = hashedToken
+    // req.user.save()
+
+    return res.json(token)
+})
+
+module.exports = { signUp, login, handleGoogle, showGoogleOAuth, exchangeJWTToUser, exchangeRefreshToken }
