@@ -19,6 +19,15 @@ function signJWT(id, email, username) {
     )
     return { accessToken, refreshToken }
 }
+function claimTokenData(req){
+    const authHeader = req.headers.authorization;
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+        const token = authHeader.split(' ')[1]; // Extract token part
+        return jwt.decode(token);
+      } else {
+        console.log("No token found in Authorization header.");
+      }
+    return "Token is incorrect";
+}
 
-
-module.exports = { signJWT }
+module.exports = { signJWT ,claimTokenData}

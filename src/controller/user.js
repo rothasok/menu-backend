@@ -2,7 +2,7 @@
 const asyncHandler = require('express-async-handler')
 const UserModel = require('../models/user.js')
 const redisClient = require('../redis/index.js')
-
+const { claimTokenData } = require('../utils')
 /**
  * Controller is a specific function to handle specific tasks
  */
@@ -19,9 +19,22 @@ const createUser = asyncHandler(async (req, res) => {
 
 const getUserById = asyncHandler(async (req, res) => {
     const id = req.params.id
-    const course = await UserModel.findById(id)
-    return res.json(course)
+    const user = await UserModel.findById(id)
+    return res.json(user)
 })
+
+
+const getUserbyToken = asyncHandler(async (req, res) => {
+    //const user = await UserModel.findOne({ email: email })
+    const userId = claimTokenData(req)['id'];
+    const user = await UserModel.findById(userId)
+    if (!user) {
+        return res.status(404).json("User not found!")
+    }
+    return res.json(user)
+})
+
+
 
 const getUsers = asyncHandler(async (req, res) => {
     // Get all courses 
@@ -46,5 +59,6 @@ module.exports = {
     getUserById,
     getUsers,
     deleteUserById,
-    updateUserById
+    updateUserById,
+    getUserbyToken
 }
