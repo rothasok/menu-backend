@@ -23,7 +23,8 @@ const redisClient = require('./src/redis/index.js');
 const fileRouter = require('./src/routes/file.js');
 const chatRouter = require('./src/routes/chat.js');
 const ChatModel = require('./src/models/chat.js');
-const roleRouter = require('./src/routes/role.js')
+const roleRouter = require('./src/routes/role.js');
+const permissionsRouter= require('./src/routes/permissions.js')
 const cors = require('cors')
 
 const { createAdapter } = require("@socket.io/redis-adapter");
@@ -155,6 +156,12 @@ app.use('/v1/roles',
         cacheInterceptor(3 * 60),
         invalidateInterceptor,
     roleRouter)
+app.use('/v1/permissions',
+        passport.authenticate('jwt', { session: false }),
+        cacheMiddleware,
+        cacheInterceptor(3 * 60),
+        invalidateInterceptor,
+    permissionsRouter)
 app.use(handleError)
 
 setupSwagger(app)

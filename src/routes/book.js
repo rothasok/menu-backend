@@ -13,6 +13,7 @@ const bookRouter = express.Router();
 
 bookRouter.post('/', permission(actions.CREATE_BOOK), createBook);
 bookRouter.get('/', permission(actions.READ_BOOK), getBooks);
+// bookRouter.get('/', getBooks);
 bookRouter.get('/:id', permission(actions.READ_BOOK), getBookById);
 bookRouter.delete('/:id', permission(actions.DELETE_BOOK), deleteBookbyId);
 bookRouter.put('/:id', permission(actions.EDIT_BOOK), updateBookById);

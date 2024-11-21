@@ -17,6 +17,15 @@ const createRoles = asyncHandler(async (req, res) => {
     return res.json(result)
 })
 
+const getRoles = asyncHandler(async (req, res) => {
+    
+    const rle = await RoleModel.find()
+    return res.json(rle)
+})
+
+
+
 module.exports = {
     createRoles,
+    getRoles,
 }

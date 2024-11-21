@@ -36,8 +36,7 @@ const userSchema = new mongoose.Schema({
     password: { type: String },
     refreshToken: { type: String },
     type: { type: String, default: 'PW' },
-    permissions: { type: mongoose.Types.ObjectId, ref: 'Role', 
-    },
+    role: { type: mongoose.Types.ObjectId, ref: 'Role', },
   });
   
   // Create the User model

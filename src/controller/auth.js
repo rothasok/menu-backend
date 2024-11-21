@@ -36,9 +36,13 @@ const login = asyncHandler(async (req, res) => {
     }
 
     const compareResult = await bcrypt.compare(password, user.password)
+   
+    
     if (!compareResult) {
         return res.status(401).json("Incorrect email or password")
+        
     }
+    console.log(user)
     // Sign JWT Token
     const token = signJWT(user._id, user.email, user.username)
 
