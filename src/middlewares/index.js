@@ -142,19 +142,32 @@ const multipleUploads = multer({
 // Check file type
 function checkFileType(file, cb) {
     // Allowed ext
-    const filetypes = /jpeg|jpg|png|gif|pdf/
+    const filetypes = /jpeg|jpg|png|gif|pdf/;
     // Check ext
-    const extname = filetypes.test(path.extname(file.originalname).toLowerCase())
+    const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
     // Check mime
-    const mimetype = filetypes.test(file.mimetype)
-
+    const mimetype = filetypes.test(file.mimetype);
+  
     if (mimetype && extname) {
-        return cb(null, true)
-    } else {
-        cb(new Error('Error: Images Only!'), false)
-    }
-}
-
+      return cb(null, true);
+    } 
+      cb(new Error('Error: Images Only!'), false);
+    
+  }
+  
+  const checkRole = (action, role) => {
+    console.log(roles[role].permissions);
+    return roles[role].permissions.includes(action);
+  };
+  
+  const permission = (action) =>
+    asyncHandler((req, res, next) => {
+      const {user} = req;
+      if (!checkRole(action, user.permission)) {
+        return res.json({ msg: 'Unauthorized' });
+      }
+      next();
+    });
 
 module.exports = {
     handleError,
@@ -166,5 +179,6 @@ module.exports = {
     cacheMiddleware,
     invalidateInterceptor,
     singleUpload,
-    multipleUploads
+    multipleUploads,
+    permission,
 }
