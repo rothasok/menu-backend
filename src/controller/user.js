@@ -67,10 +67,12 @@ const createUser = asyncHandler(async (req, res) => {
 
 
 const getUserById = asyncHandler(async (req, res) => {
-    const id = req.params.id
-    const user = await UserModel.findById(id)
-    return res.json(user)
-})
+    const id = req.params.id.trim();
+    console.log("Requested ID:", id);
+    const user = await UserModel.findById(id);
+    return res.json(user);
+});
+
 
 
 const getUserbyToken = asyncHandler(async (req, res) => {
@@ -92,7 +94,7 @@ const getUsers = asyncHandler(async (req, res) => {
 })
 
 const deleteUserById = asyncHandler(async (req, res) => {
-    const id = req.params.id
+    const id = req.params.id.trim();
     const result = await UserModel.deleteOne({ _id: id })
     return res.json(result)
 })

@@ -6,7 +6,7 @@ const axios = require('axios')
 const { signJWT } = require('../utils')
 
 const signUp = asyncHandler(async (req, res) => {
-    const { firstname, lastname, email, password, confirmPassword } = req.body
+    const { firstname, lastname, email, password, confirmPassword,role } = req.body
     const hashedPassword = await bcrypt.hash(password, 10)
     const username = Date.now() + firstname
 
@@ -15,7 +15,8 @@ const signUp = asyncHandler(async (req, res) => {
         firstname: firstname,
         lastname: lastname,
         email: email,
-        password: hashedPassword
+        password: hashedPassword,
+        role: role
     })
 
     const result = await user.save()
