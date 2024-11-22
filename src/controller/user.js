@@ -53,7 +53,7 @@ const createUser = asyncHandler(async (req, res) => {
 //       type: type || 'PW', // Default to 'PW' if not provided
 //       permissions: '673dfbf9fc98ea530e09a888', // Store the ObjectId for permissions
 //     });
- 
+
 //     // Save the user to the database
 //     const result = await user.save();
 
@@ -78,7 +78,16 @@ const getUserById = asyncHandler(async (req, res) => {
 const getUserbyToken = asyncHandler(async (req, res) => {
     //const user = await UserModel.findOne({ email: email })
     const userId = claimTokenData(req)['id'];
-    const user = await UserModel.findById(userId).populate('role')
+    // const user = await UserModel.findById(userId).populate('role')
+    const user = await UserModel.findById(userId)
+        .populate({
+            path: 'role',
+            populate: {
+                path: 'permissions',
+                model: 'Permissions', // Replace with the actual model name for permissions
+            },
+        });
+
     if (!user) {
         return res.status(404).json("User not found!")
     }
