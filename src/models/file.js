@@ -9,7 +9,11 @@ const fileSchema = new mongoose.Schema({
     mimetype: { type: String, required: true },
     encoding: { type: String, required: true },
     createdDate: { type: Date, required: true, default: new Date() },
-    etag: { type: String}
+    etag: { type: String},
+    num: { type: String, required: true },
+    title: { type: String, required: true },
+    type:{ type: String},
+    role: { type: mongoose.Types.ObjectId, ref: 'Role', },
 })
 
 const FileModel = mongoose.model('Files', fileSchema)
