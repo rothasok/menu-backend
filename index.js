@@ -147,7 +147,6 @@ app.use('/v1/books',
 app.use('/v1/users',
     passport.authenticate('jwt', { session: false }),
     cacheMiddleware,
-    cacheInterceptor(3 * 60),
     invalidateInterceptor,
     userRouter)
 app.use('/v1/roles',

@@ -4,7 +4,7 @@ const { Schema } = mongoose;
 // Define the permissions schema
 const permissionSchema = new mongoose.Schema({
   permissionName: { type: String, required: true, unique: true }, 
-  slug:[{type: String}],
+  slug:{type: String},
   description: { type: String }, 
 });
 

@@ -6,23 +6,60 @@ const axios = require('axios')
 const { signJWT } = require('../utils')
 
 const signUp = asyncHandler(async (req, res) => {
-    const { firstname, lastname, email, password, confirmPassword,role } = req.body
-    const hashedPassword = await bcrypt.hash(password, 10)
-    const username = Date.now() + firstname
+    console.log("ok");
+    const { firstname, lastname, email, password, confirmPassword, role, phone, position,gender,dob,organization } = req.body;
+    let result; // Use let here
+    const id = req.params.id;
 
-    const user = new UserModel({
-        username: username,
-        firstname: firstname,
-        lastname: lastname,
-        email: email,
-        password: hashedPassword,
-        role: role
-    })
+    if (!id) {
+        // Creating a new user
+        console.log("Creating new user...");
+        const hashedPassword = await bcrypt.hash(password, 10);
+        const username = firstname + lastname;
 
-    const result = await user.save()
-    result.password = ''
-    return res.json(result)
-})
+        const newUser = new UserModel({
+            username: username,
+            firstname: firstname,
+            lastname: lastname,
+            gender:gender,
+            dob:dob,
+            email: email,
+            password: hashedPassword,
+            role: role,
+            phone: phone,
+            position: position,
+            organization: organization,
+        });
+
+        result = await newUser.save();
+    } else {
+        // Updating existing user
+        console.log("Updating existing permission...");
+
+        // Update user fields
+        const updateData = {
+            firstname,
+            lastname,
+            gender,
+            dob,
+            email,
+            role,
+            phone,
+            position,
+            organization,
+        };
+
+        // If the password is provided, hash it and include it in the update
+        if (password) {
+            updateData.password = await bcrypt.hash(password, 10);
+        }
+
+        result = await UserModel.updateOne({ _id: id }, { $set: updateData });
+    }
+
+    return res.json(result);
+});
+
 
 const login = asyncHandler(async (req, res) => {
     const { email, password } = req.body
@@ -31,17 +68,21 @@ const login = asyncHandler(async (req, res) => {
     if (!user) {
         return res.status(404).json("User not found!")
     }
+    if (user.active !== 1) {
+        return res.status(403).json("Account is inactive. Please contact support.");
+      }
+    
     // SSO Logics
     if (user.type == "SSO") {
         return res.status(405).json("Only Password User Allowed")
     }
 
     const compareResult = await bcrypt.compare(password, user.password)
-   
-    
+
+
     if (!compareResult) {
         return res.status(401).json("Incorrect email or password")
-        
+
     }
     console.log(user)
     // Sign JWT Token

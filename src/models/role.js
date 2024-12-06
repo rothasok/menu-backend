@@ -5,7 +5,7 @@ const { Schema } = mongoose;
 const roleSchema = new mongoose.Schema({
   roleName: { type: String, required: true, unique: true }, // Admin, User, Guest, etc.
   description: { type: String, required: true }, // Optional description of the role
-  permissions: { type: mongoose.Types.ObjectId, ref: 'Permissions', },
+  permissions: [{ type: mongoose.Types.ObjectId, ref: 'Permissions', }],
 });
 
 // Create the Role model

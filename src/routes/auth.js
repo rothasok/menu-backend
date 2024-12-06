@@ -5,7 +5,7 @@ const authRouter = express.Router();
 const { signUpSchema } = require('../common/validator');
 const { handleValidation, verifyJWT, verifyRefresh } = require('../middlewares');
 
-authRouter.post('/sign-up', signUpSchema, handleValidation, signUp)
+authRouter.post('/sign-up/:id?', signUpSchema, handleValidation, signUp)
 authRouter.post('/login', login)
 authRouter.get('/google-oauth', showGoogleOAuth)
 authRouter.get('/google-callback', handleGoogle)
