@@ -10,7 +10,7 @@ dbConnect().catch((err) => {
     console.log(err)
 })
 
-const numberOfCourse = 1000
+const numberOfCourse = 100
 const numberOfUsers = 100
 const numberOfBooks = 500
 
