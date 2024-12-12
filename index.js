@@ -124,7 +124,7 @@ app.use(bodyParser.json())
 app.use('/v1/auth', authRouter)
 app.use('/v1/chats', chatRouter)
 
-app.use(limiter)
+// app.use(limiter)
 app.use('/v1/files', passport.authenticate('jwt', { session: false }), fileRouter)
 //app.use('/v1/files',  fileRouter)
 
@@ -149,19 +149,19 @@ app.use('/v1/books',
 app.use('/v1/users',
     passport.authenticate('jwt', { session: false }),
     cacheMiddleware,
-    cacheInterceptor(3 * 60),
+    // cacheInterceptor(3 * 60),
     invalidateInterceptor,
     userRouter)
 app.use('/v1/roles',
         passport.authenticate('jwt', { session: false }),
         cacheMiddleware,
-        cacheInterceptor(3 * 60),
+        // cacheInterceptor(3 * 60),
         invalidateInterceptor,
     roleRouter)
 app.use('/v1/permissions',
         passport.authenticate('jwt', { session: false }),
         cacheMiddleware,
-        cacheInterceptor(3 * 60),
+        // cacheInterceptor(3 * 60),
         invalidateInterceptor,
     permissionsRouter)
 app.use(handleError)

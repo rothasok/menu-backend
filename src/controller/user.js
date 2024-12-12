@@ -198,6 +198,10 @@ const getUserbyToken = asyncHandler(async (req, res) => {
 const getUsers = asyncHandler(async (req, res) => {
     // Get all courses 
     const courses = await UserModel.find()
+    .populate({
+        path: 'role', // Reference field in User schema
+        select: '_id roleName'
+    });
     return res.json(courses)
 })
 

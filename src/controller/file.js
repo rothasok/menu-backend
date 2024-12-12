@@ -2,7 +2,8 @@ const asyncHandler = require("express-async-handler");
 const FileModel = require("../models/file");
 const path = require('path')
 const { S3Client, DeleteObjectCommand } = require('@aws-sdk/client-s3')
-const fs = require('fs')
+const fs = require('fs');
+const RoleModel = require("../models/role");
 
 const s3Clinet = new S3Client({
     region: process.env.AWS_REGION,
@@ -17,6 +18,31 @@ const getAllFiles = asyncHandler(async (req, res) => {
     const files = await FileModel.find(type)
     return res.json(files)
 })
+
+
+const getFilebyRoleID = asyncHandler(async (req, res) => {
+    const roleId = req.params.id;
+    
+    try {
+        const role = await RoleModel.findById(roleId);
+        if (!role) {
+            return res.status(404).json({ message: "Role not found" });
+        }
+
+        const type = req.query;
+        // Include the roleId in the query conditions
+        const query = { ...type, role: roleId };
+
+        const files = await FileModel.find(query);
+        return res.json(files);
+    } catch (error) {
+        return res.status(500).json({ message: "Server error", error: error.message });
+    }
+});
+
+
+
+
 
 const handleUpload = asyncHandler(async (req, res) => {
 
@@ -121,5 +147,5 @@ const updateTextById = asyncHandler(async (req, res) => {
 })
 module.exports = {
     updateFileById, getText, updateTextById,
-    handleUpload, getFile, handleUploads, handleS3Upload, deleteFileS3, getAllFiles, deleteFile
+    handleUpload, getFile, handleUploads, handleS3Upload, deleteFileS3, getAllFiles, deleteFile,getFilebyRoleID
 }
