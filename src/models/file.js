@@ -13,7 +13,7 @@ const fileSchema = new mongoose.Schema({
     num: { type: String, required: true },
     title: { type: String, required: true },
     type:{ type: String},
-    role: { type: mongoose.Types.ObjectId, ref: 'Role', },
+    permissionid: { type: mongoose.Types.ObjectId, ref: 'Permissions', },
 })
 
 const FileModel = mongoose.model('Files', fileSchema)

@@ -4,6 +4,7 @@ const path = require('path')
 const { S3Client, DeleteObjectCommand } = require('@aws-sdk/client-s3')
 const fs = require('fs');
 const RoleModel = require("../models/role");
+const permissionsModel = require("../models/permissions");
 
 const s3Clinet = new S3Client({
     region: process.env.AWS_REGION,
@@ -20,18 +21,18 @@ const getAllFiles = asyncHandler(async (req, res) => {
 })
 
 
-const getFilebyRoleID = asyncHandler(async (req, res) => {
-    const roleId = req.params.id;
+const getFilebyPermissionID = asyncHandler(async (req, res) => {
+    const perId = req.params.id;
     
     try {
-        const role = await RoleModel.findById(roleId);
-        if (!role) {
-            return res.status(404).json({ message: "Role not found" });
+        const per = await permissionsModel.findById(perId);
+        if (!per) {
+            return res.status(404).json({ message: "permission not found" });
         }
 
         const type = req.query;
         // Include the roleId in the query conditions
-        const query = { ...type, role: roleId };
+        const query = { ...type, permissionid: perId };
 
         const files = await FileModel.find(query);
         return res.json(files);
@@ -51,11 +52,11 @@ const handleUpload = asyncHandler(async (req, res) => {
     //const text = req.body.text;
     const num = req.body.num
     const title = req.body.title
-    const role = req.body.role
+    const permission = req.body.permissionid
     const type = req.body.type
     const { ...self } = req.file
     const file = new FileModel({
-        role: role,
+        permissionid: permission,
         type: type,
         num: num,
         title: title,
@@ -147,5 +148,5 @@ const updateTextById = asyncHandler(async (req, res) => {
 })
 module.exports = {
     updateFileById, getText, updateTextById,
-    handleUpload, getFile, handleUploads, handleS3Upload, deleteFileS3, getAllFiles, deleteFile,getFilebyRoleID
+    handleUpload, getFile, handleUploads, handleS3Upload, deleteFileS3, getAllFiles, deleteFile,getFilebyPermissionID
 }
