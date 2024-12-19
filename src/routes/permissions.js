@@ -3,8 +3,10 @@ const { createPermissions, getPermissions,deletePermissionbyId, updatePermission
 const permissionsRouter = express.Router()
 
 permissionsRouter.post('/:id?', createPermissions)
+
 permissionsRouter.get('/', getPermissions)
 permissionsRouter.delete('/:id', deletePermissionbyId)
+
 // permissionsRouter.put('/:id', updatePermissionById)
 
 

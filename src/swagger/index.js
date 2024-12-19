@@ -1,16 +1,16 @@
-const swagger = require("swagger-generator-express")
+const swagger = require("swagger-generator-express");
 
-// Define your router here
+// Define your router and routes here
 
 const options = {
     title: "CADT Express API",
     version: "1.0.0",
-    host: process.env.API_HOST,
+    host: process.env.API_HOST || "localhost:3000", // Default host fallback for development
     basePath: "/",
     schemes: ["http", "https"],
     securityDefinitions: {
         Bearer: {
-            description: 'Example value:- Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjU5MmQwMGJhNTJjYjJjM',
+            description: 'Example value: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjU5MmQwMGJhNTJjYjJjM',
             type: 'apiKey',
             name: 'Authorization',
             in: 'header',
@@ -19,21 +19,19 @@ const options = {
     },
     security: [{ Bearer: [] }],
     defaultSecurity: 'Bearer'
-}
+};
+
 
 /**
- * serveSwagger must be called after defining your router.
- * @param app Express object
- * @param endPoint Swagger path on which swagger UI display
- * @param options Swagget Options.
- * @param path.routePath path to folder in which routes files defined.
- * @param path.requestModelPath Optional parameter which is path to folder in which requestModel defined, if not given request params will not display on swagger documentation.
- * @param path.responseModelPath Optional parameter which is path to folder in which responseModel defined, if not given response objects will not display on swagger documentation.
+ * Function to setup Swagger documentation.
+ * @param {object} app - Express app instance
  */
-
-
 function setupSwagger(app) {
-    swagger.serveSwagger(app, "/docs", options, { routePath: './src/routes/', requestModelPath: './src/models/request', responseModelPath: './src/models/response' })
+    swagger.serveSwagger(app, "/docs", options, {
+        routePath: './src/routes/', // Ensure this folder contains your route files
+        requestModelPath: './src/models/request', // Path to request models (optional, update as needed)
+        responseModelPath: './src/models/response' // Path to response models (optional, update as needed)
+    });
 }
 
-module.exports = setupSwagger
+module.exports = setupSwagger;

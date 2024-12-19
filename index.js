@@ -117,6 +117,7 @@ const loginLimit = rateLimit({
 passport.use(jwtStrategy)
 
 app.use("/uploads", express.static("uploads"))
+
 // app.use(bodyParser.urlencoded())
 app.use(bodyParser.json())
 // app.use(logger)

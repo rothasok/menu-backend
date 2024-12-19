@@ -21,18 +21,39 @@ const getAllFiles = asyncHandler(async (req, res) => {
 })
 
 
-const getFilebyPermissionID = asyncHandler(async (req, res) => {
-    const perId = req.params.id;
+// const getFilebyPermissionID = asyncHandler(async (req, res) => {
+//     const perId = req.params.id;
+    
+//     try {
+//         const per = await permissionsModel.findById(perId);
+//         if (!per) {
+//             return res.status(404).json({ message: "permission not found" });
+//         }
+
+//         const type = req.query;
+//         // Include the roleId in the query conditions
+//         const query = { ...type, permissionid: perId };
+
+//         const files = await FileModel.find(query);
+//         return res.json(files);
+//     } catch (error) {
+//         return res.status(500).json({ message: "Server error", error: error.message });
+//     }
+// });
+
+
+const getFilebyRoleID = asyncHandler(async (req, res) => {
+    const roleId = req.params.id;
     
     try {
-        const per = await permissionsModel.findById(perId);
-        if (!per) {
-            return res.status(404).json({ message: "permission not found" });
+        const role = await RoleModel.findById(roleId);
+        if (!role) {
+            return res.status(404).json({ message: "Role not found" });
         }
 
         const type = req.query;
         // Include the roleId in the query conditions
-        const query = { ...type, permissionid: perId };
+        const query = { ...type, role: roleId };
 
         const files = await FileModel.find(query);
         return res.json(files);
@@ -42,6 +63,24 @@ const getFilebyPermissionID = asyncHandler(async (req, res) => {
 });
 
 
+const getFilesByQuery = asyncHandler(async (req, res) => {
+    try {
+        // Get query parameters directly from req.query
+        const { type, slug } = req.query;
+
+              const query = { type: type, slug: slug };
+      const files = await FileModel.find(query);
+
+        // Respond with the list of files
+        if (files.length === 0) {
+            return res.status(404).json({ message: "No files found for the given criteria." });
+        }
+
+        return res.json(files);
+    } catch (error) {
+        return res.status(500).json({ message: "Server error", error: error.message });
+    }
+});
 
 
 
@@ -52,16 +91,19 @@ const handleUpload = asyncHandler(async (req, res) => {
     //const text = req.body.text;
     const num = req.body.num
     const title = req.body.title
-    const permission = req.body.permissionid
+    const role = req.body.role
     const type = req.body.type
+    const slug = req.body.slug
     const { ...self } = req.file
     const file = new FileModel({
-        permissionid: permission,
+        role: role,
         type: type,
         num: num,
         title: title,
+        slug: slug,
         ...self
     })
+    console.log(role);
     file.save()
     return res.json(file)
 })
@@ -148,5 +190,5 @@ const updateTextById = asyncHandler(async (req, res) => {
 })
 module.exports = {
     updateFileById, getText, updateTextById,
-    handleUpload, getFile, handleUploads, handleS3Upload, deleteFileS3, getAllFiles, deleteFile,getFilebyPermissionID
+    handleUpload, getFile, handleUploads, handleS3Upload, deleteFileS3, getAllFiles, deleteFile,getFilebyRoleID,getFilesByQuery
 }
