@@ -152,7 +152,9 @@ app.use('/v1/pdf', pdfRouter)
 //     cacheInterceptor(3 * 60),
 //     invalidateInterceptor,
 //     bookRouter)
-
+// Increase request header size limit
+app.use(express.json({ limit: '50mb' })); // Increase the limit
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
 // Routes without Redis cache
 app.use('/v1/users',
     passport.authenticate('jwt', { session: false }),
