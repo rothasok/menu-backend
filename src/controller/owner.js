@@ -101,51 +101,46 @@ const deactivateOwner = asyncHandler(async (req, res) => {
 
 const searchOwners = asyncHandler(async (req, res) => {
     try {
-        const { query, page = 1, limit = 10 } = req.query;
+        const { query = "", page = 1, limit = 10 } = req.query;
         const skip = (parseInt(page) - 1) * parseInt(limit);
 
-        if (!query) {
-            return res.status(400).json({ message: "Search query is required" });
-        }
-
         // Create a case-insensitive regex for partial matching
-        const searchRegex = new RegExp(query, "i");
+        const searchRegex = query ? new RegExp(query, "i") : null;
 
         // Convert role input to numeric value
         let roleValue = null;
         if (query.toLowerCase().includes("owner")) roleValue = 1;
         if (query.toLowerCase().includes("admin")) roleValue = 2;
 
-        // Find owners by partial matching in firstname, lastname, or phone
-        const owners = await OwnerModel.find({
-            $or: [
+        // Build search filter
+        const filter = { active: 1 };
+        if (query) {
+            filter.$or = [
                 { firstname: { $regex: searchRegex } },
                 { lastname: { $regex: searchRegex } },
-                { phone: { $regex: searchRegex } },
-                ...(roleValue !== null ? [{ role: roleValue }] : [])
-            ]
-        })
+                { phone: { $regex: searchRegex } }
+            ];
+            if (roleValue !== null) {
+                filter.$or.push({ role: roleValue });
+            }
+        }
+
+        // Find owners based on the filter
+        const owners = await OwnerModel.find(filter)
             .skip(skip)
-            .limit(parseInt(limit));
+            .limit(parseInt(limit))
+            .exec();
 
         // Format the response with full name and role
         const ownersWithRoles = owners.map(owner => ({
-            id: owner._id, // Include the owner's ID
+            id: owner._id,
             name: `${owner.firstname} ${owner.lastname}`.trim(),
             phone: owner.phone,
-            role: owner.role === 1 ? "Owner" : owner.role === 2 ? "Admin" : "Unknown",
-
+            role: owner.role === 1 ? "Owner" : owner.role === 2 ? "Admin" : "Unknown"
         }));
 
         // Get total count for pagination
-        const totalOwners = await OwnerModel.countDocuments({
-            $or: [
-                { firstname: { $regex: searchRegex } },
-                { lastname: { $regex: searchRegex } },
-                { phone: { $regex: searchRegex } },
-                ...(roleValue !== null ? [{ role: roleValue }] : [])
-            ]
-        });
+        const totalOwners = await OwnerModel.countDocuments(filter).exec();
 
         res.json({
             currentPage: parseInt(page),
@@ -157,6 +152,7 @@ const searchOwners = asyncHandler(async (req, res) => {
         res.status(500).json({ message: "Server error", error: error.message });
     }
 });
+
 
 
 
@@ -250,7 +246,7 @@ const login = asyncHandler(async (req, res) => {
     // user.refreshToken = hashedToken
     // user.save()
 
-    return res.json(token)
+    return res.json({Token:token})
 })
 
 
