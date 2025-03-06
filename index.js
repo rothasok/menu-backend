@@ -15,16 +15,18 @@ const { handleError, cacheMiddleware, cacheInterceptor, invalidateInterceptor, v
 
 const dbConnect = require('./src/db/db.js')
 const bookRouter = require('./src/routes/book.js')
+const ownerRouter = require('./src/routes/owner.js')
 const userRouter = require('./src/routes/user.js')
 const courseRouter = require('./src/routes/course.js')
 const authRouter = require('./src/routes/auth.js');
 const jwtStrategy = require('./src/common/strategy/jwt.js');
 const redisClient = require('./src/redis/index.js');
 const fileRouter = require('./src/routes/file.js');
+const pdfRouter=require('./src/routes/pdf.js');
 const chatRouter = require('./src/routes/chat.js');
 const ChatModel = require('./src/models/chat.js');
 const roleRouter = require('./src/routes/role.js');
-const permissionsRouter= require('./src/routes/permissions.js')
+const permissionsRouter = require('./src/routes/permissions.js')
 const cors = require('cors')
 
 const { createAdapter } = require("@socket.io/redis-adapter");
@@ -39,6 +41,7 @@ const app = express()
 app.use(cors())
 const server = createServer(app, (req, res) => {
     const headers = {
+        origin: '*',  // allow cors 
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Methods': 'OPTIONS, POST, GET',
         'Access-Control-Max-Age': 2592000, // 30 days
@@ -75,20 +78,20 @@ const io = new Server(server, {
 
 
 // protocal: websocket, socket.io
-io.on('connection', (socket) => {
-    console.log(`${socket.id} connected`);
-    socket.on('send-message', async (payload) => {
-        const chat = new ChatModel({
-            byUser: payload.id,
-            text: payload.text
-        })
-        await chat.save()
-        await chat.populate('byUser')
-        // Recieve
-        // Save chat to DB
-        io.emit('re-message', chat)
-    })
-})
+// io.on('connection', (socket) => {
+//     console.log(`${socket.id} connected`);
+//     socket.on('send-message', async (payload) => {
+//         const chat = new ChatModel({
+//             byUser: payload.id,
+//             text: payload.text
+//         })
+//         await chat.save()
+//         await chat.populate('byUser')
+//         // Recieve
+//         // Save chat to DB
+//         io.emit('re-message', chat)
+//     })
+// })
 
 dbConnect().catch((err) => {
     console.log(err)
@@ -100,7 +103,7 @@ const limiter = rateLimit({
         sendCommand: (...args) => redisClient.sendCommand(args),
     }),
     windowMs: 1 * 60 * 1000, // 1 minutes
-    max: 30, // Limit each IP to 100 requests per windowMs
+    max: 30,
     message: { msg: 'Too many requests from this IP, please try again later.' },
 })
 // console.log("Restart")
@@ -110,8 +113,8 @@ const loginLimit = rateLimit({
         sendCommand: (...args) => redisClient.sendCommand(args),
     }),
     windowMs: 5 * 60 * 1000, // 5 minutes
-    max: 5, // Limit each IP to 100 requests per windowMs
-    message: { msg: 'Too many login attampt' },
+    max: 5,
+    message: { msg: 'Too many login attempts' },
 })
 
 passport.use(jwtStrategy)
@@ -123,48 +126,65 @@ app.use(bodyParser.json())
 // app.use(logger)
 
 app.use('/v1/auth', authRouter)
-app.use('/v1/chats', chatRouter)
+// app.use('/v1/chats', chatRouter)
 
 // app.use(limiter)
-app.use('/v1/files', passport.authenticate('jwt', { session: false }), fileRouter)
+// app.use('/v1/files', passport.authenticate('jwt', { session: false }), fileRouter)
+app.use('/v1/files', fileRouter)
 //app.use('/v1/files',  fileRouter)
 
-//Redis Cache
-// app.use(passport.authenticate('jwt', { session: false }))
-// app.use(cacheMiddleware)
-// app.use(cacheInterceptor(3 * 60))
-// app.use(invalidateInterceptor)
-// Cachable Routes
-app.use('/v1/courses',
-    passport.authenticate('jwt', { session: false }),
-    cacheMiddleware,
-    cacheInterceptor(3 * 60),
-    invalidateInterceptor,
-    courseRouter)
-app.use('/v1/books',
-    passport.authenticate('jwt', { session: false }),
-    cacheMiddleware,
-    cacheInterceptor(3 * 60),
-    invalidateInterceptor,
-    bookRouter)
+app.use('/v1/owner', ownerRouter)
+
+app.use('/v1/pdf', pdfRouter)
+//app.use('/v1/files',  fileRouter)
+
+// Cachable Routes with Redis cache
+// app.use('/v1/courses',
+//     passport.authenticate('jwt', { session: false }),
+//     cacheMiddleware,
+//     cacheInterceptor(3 * 60),
+//     invalidateInterceptor,
+//     courseRouter)
+
+// app.use('/v1/books',
+//     passport.authenticate('jwt', { session: false }),
+//     cacheMiddleware,
+//     cacheInterceptor(3 * 60),
+//     invalidateInterceptor,
+//     bookRouter)
+// Increase request header size limit
+app.use(express.json({ limit: '50mb' })); // Increase the limit
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
+// Routes without Redis cache
 app.use('/v1/users',
     passport.authenticate('jwt', { session: false }),
     cacheMiddleware,
     // cacheInterceptor(3 * 60),
     invalidateInterceptor,
     userRouter)
+
 app.use('/v1/roles',
         passport.authenticate('jwt', { session: false }),
-        cacheMiddleware,
-        // cacheInterceptor(3 * 60),
-        invalidateInterceptor,
-    roleRouter)
-app.use('/v1/permissions',
         passport.authenticate('jwt', { session: false }),
         cacheMiddleware,
         // cacheInterceptor(3 * 60),
-        invalidateInterceptor,
+    passport.authenticate('jwt', { session: false }),
+        cacheMiddleware,
+        // cacheInterceptor(3 * 60),
+    invalidateInterceptor,
+    roleRouter)
+
+app.use('/v1/permissions',
+        passport.authenticate('jwt', { session: false }),
+        passport.authenticate('jwt', { session: false }),
+        cacheMiddleware,
+        // cacheInterceptor(3 * 60),
+    passport.authenticate('jwt', { session: false }),
+        cacheMiddleware,
+        // cacheInterceptor(3 * 60),
+    invalidateInterceptor,
     permissionsRouter)
+
 app.use(handleError)
 
 setupSwagger(app)

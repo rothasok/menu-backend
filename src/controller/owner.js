@@ -101,15 +101,13 @@ const deactivateOwner = asyncHandler(async (req, res) => {
 
 const searchOwners = asyncHandler(async (req, res) => {
     try {
-        const { query, page = 1, limit = 10 } = req.query;
+
+        const { query = "", page = 1, limit = 10 } = req.query;
         const skip = (parseInt(page) - 1) * parseInt(limit);
 
-        if (!query) {
-            return res.status(400).json({ message: "Search query is required" });
-        }
-
         // Create a case-insensitive regex for partial matching
-        const searchRegex = new RegExp(query, "i");
+        const searchRegex = query ? new RegExp(query, "i") : null;
+
 
         // Convert role input to numeric value
         let roleValue = null;
@@ -241,7 +239,7 @@ const login = asyncHandler(async (req, res) => {
     
     //const token = signJWTOwner("67c520d6fe18f42eb34e1dee",2);
     // console.log("Generated Token:", token);
-    //const token = signJWTOwner(user._id.toString(), user.phone, user.firstname, user.role)
+    const token = signJWTOwner(user._id.toString(), user.phone, user.firstname, user.role)
 
     // Save refresh in database
 
@@ -250,7 +248,7 @@ const login = asyncHandler(async (req, res) => {
     // user.refreshToken = hashedToken
     // user.save()
 
-    return res.json(token)
+    return res.json({Token:token})
 })
 
 
