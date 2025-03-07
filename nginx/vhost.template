@@ -9,7 +9,8 @@ http {
         ''      close;
     }
     upstream backend {
-        server ${EXPRESS_HOST_1}:${EXPRESS_PORT};
+        server menu-backend:3000;
+        #server ${EXPRESS_HOST_1}:${EXPRESS_PORT};
         # server ${EXPRESS_HOST_2}:${EXPRESS_PORT};
         # server ${EXPRESS_HOST_3}:${EXPRESS_PORT};
     }

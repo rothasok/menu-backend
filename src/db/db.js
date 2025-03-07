@@ -34,7 +34,8 @@ const authSource = "admin"; // Authentication database (typically 'admin')
 // const mongoURI = `mongodb://${dbContainer}:27017`;
 // const mongoURI = `mongodb://localhost:27017/` use this line for npm run generate for books courses and users
 // const mongoURI = `mongodb://${username}:${password}@89.117.146.214:27017/?authSource=${authSource}`;
-const mongoURI = `mongodb://admin:PwdKeyforMongo@89.117.146.214:27017/database?authSource=admin`;
+// const mongoURI = `mongodb://admin:PwdKeyforMongo@89.117.146.214:27017/database?authSource=admin`;
+const mongoURI = `mongodb://admin:PwdKeyforMongo@mongodb:27017/?authSource=admin`;
 
 
 async function dbConnect() {

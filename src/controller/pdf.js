@@ -271,7 +271,8 @@ const getQrBase64ByUserID = asyncHandler(async (req, res) => {
         }
 
         // Generate a link to the PDF (or use any metadata for the QR code)
-        const pdfLink = `https://api.ezetech.online/v1/pdf/${userId}`; // Example link
+        // const pdfLink = `${process.env.API_HOST}/v1/pdf/${userId}`; // Example link
+        const pdfLink = `${process.env.API_HOST}/v1/pdf/${userId}`;
 
         // Generate the QR code as a Base64-encoded string
         const qrCodeBase64 = await QRCode.toDataURL(pdfLink);
@@ -368,8 +369,9 @@ const handleImageUpload = asyncHandler(async (req, res) => {
         await image.save();
 
         // Generate the link for the uploaded image (use your base API URL and user ID)
-        const fileLink = `https://api.ezetech.online/v1/images/${userid}`;
-
+        // const fileLink = `${process.env.API_HOST}/v1/images/${userid}`;
+        const fileLink = `${process.env.API_HOST}/v1/images/${userid}`;
+        
         // Generate the QR Code as Base64
         const qrCodeBase64 = await QRCode.toDataURL(fileLink);
 
@@ -402,8 +404,8 @@ const handlePdfUpload = asyncHandler(async (req, res) => {
         await pdf.save();
 
         // Generate the link for the uploaded file (use your base API URL and file ID)
-        const fileLink = `https://api.ezetech.online/v1/pdf/${user}`;
-        // const fileLink = `https://api.ezetech.online/v1/files/679848ad991b18df46d05b11`;
+        const fileLink = `${process.env.API_HOST}/v1/pdf/${user}`;
+        // const fileLink = `${process.env.API_HOST}/v1/files/679848ad991b18df46d05b11`;
 
         // Generate QR Code as Base64
         const qrCodeBase64 = await QRCode.toDataURL(fileLink);
@@ -426,7 +428,7 @@ const handleGetQR = asyncHandler(async (req, res) => {
 
         // Generate the link for the uploaded file (use your base API URL and file ID)
         const user = req.params.id;
-        const fileLink = `https://api.ezetech.online/v1/pdf/${user}`;
+        const fileLink = `${process.env.API_HOST}/v1/pdf/${user}`;
 
         // Generate QR Code as Base64
         const qrCodeBase64 = await QRCode.toDataURL(fileLink);
