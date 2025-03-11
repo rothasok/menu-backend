@@ -18,8 +18,8 @@ jobs:
           mkdir -p ~/.ssh
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -H YOUR_SERVER_IP >> ~/.ssh/known_hosts
+          ssh-keyscan -H 89.117.146.214 >> ~/.ssh/known_hosts
 
       - name: Deploy to Server
         run: |
-          ssh -i ~/.ssh/id_rsa root@YOUR_SERVER_IP "cd /path/to/your/project && git pull && docker-compose up -d --build"
+          ssh -i ~/.ssh/id_rsa root@89.117.146.214 "cd /path/to/your/project && git pull && docker-compose up -d --build"
