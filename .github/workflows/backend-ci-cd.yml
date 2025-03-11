@@ -21,4 +21,4 @@ jobs:
 
       - name: Deploy to Server
         run: |
-          ssh -i ~/.ssh/id_rsa root@89.117.146.214 "cd /root/menu-backend && git pull && docker-compose up -d --build"
+          ssh -i ~/.ssh/id_rsa root@89.117.146.214 "cd /root/menu-backend && git pull && docker compose up -d --build"
