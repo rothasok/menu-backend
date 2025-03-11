@@ -10,7 +10,7 @@ const signUp = asyncHandler(async (req, res) => {
     const { firstname, lastname, email, password, confirmPassword, role, phone, position,gender,dob,organization } = req.body;
     let result; // Use let here
     const id = req.params.id;
-
+    //sdsdasd
     if (!id) {
         // Creating a new user
         console.log("Creating new user...");

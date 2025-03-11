@@ -14,7 +14,9 @@ services:
       - EXPRESS_PORT=3000
       - NGINX_MAX_BODY=100M
     ports:
-      - 3000:3000
+      - 3000:
+    networks:
+      - my_network
   express:
     container_name: menu-backend
     build:
@@ -30,6 +32,8 @@ services:
     depends_on:
       - mongodb
       - redis
+    networks:
+      - my_network
   mongodb:
     build:
       context: .
@@ -43,11 +47,15 @@ services:
       - "27017:27017"
     volumes:
       - mongodbdata:/data/db
+    networks:
+      - my_network
   redis:
     image: redis:5
     container_name: cadt-redis
     ports:
       - 6379:6379
+    networks:
+      - my_network
   redis-commander:
     image: rediscommander/redis-commander:latest
     environment:
@@ -56,6 +64,8 @@ services:
       - "8082:8081"
     depends_on:
       - redis
+    networks:
+      - my_network
 volumes:
   mongodbdata:
 
