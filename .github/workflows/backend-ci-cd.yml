@@ -3,17 +3,16 @@ name: Deploy to Contabo Server
 on:
   push:
     branches:
-      - main  # Runs when you push to the `main` branch
+      - main  # Adjust to your branch name
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Repository
+      - name: Checkout code
         uses: actions/checkout@v3
-
-      - name: Set up SSH
+      - name: Setup SSH Key
         run: |
           mkdir -p ~/.ssh
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
