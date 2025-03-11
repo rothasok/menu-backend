@@ -1,0 +1,22 @@
+- name: Setup VPS instance
+  hosts: vps
+  become: yes
+  tasks:
+    - name: Update APT package list
+      apt:
+        update_cache: yes
+
+    - name: Install required package
+      apt:
+        name:
+          - wget
+          - curl
+          - git
+          - net-tools
+          - neofetch
+        state: present
+    # - name: Run commands
+    #   ansible.builtin.shell: |
+    #     whoami
+    #     pwd
+    #     git --version
