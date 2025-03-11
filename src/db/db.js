@@ -23,13 +23,14 @@ const mongoose = require('mongoose');
 
 const dbName = process.env.DB_NAME;
 const dbContainer = 'mongodb';
-
-const username = "admin1";
+const username = "admin";
 const password = "PwdKeyforMongo"; // Replace with the actual password
 
 const authSource = "admin"; // Authentication database (typically 'admin')
 // const port="27017"
 
+
+//testing
 // MongoDB connection URI
 // const mongoURI = `mongodb://${dbContainer}:27017`;
 // const mongoURI = `mongodb://localhost:27017/` use this line for npm run generate for books courses and users
